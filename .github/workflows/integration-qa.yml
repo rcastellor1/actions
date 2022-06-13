@@ -37,6 +37,7 @@ jobs:
           docker run --rm \
             --mount type=bind,source="$(pwd)"/database/config/changelog.xml,target=/liquibase/changelog.xml \
             --mount type=bind,source="$(pwd)"/database/scripts,target=/liquibase/scripts \
+            --network "host" \
             liquibase/liquibase \
             --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
             --changeLogFile=changelog.xml \
