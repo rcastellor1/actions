@@ -1,5 +1,5 @@
 ---
-name: code-maven-QA-integration-postgres
+name: QA-integration-postgres
 
 on:
   workflow_dispatch:
@@ -32,6 +32,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Initialize database
+        run: |
+          docker run --rm \
+            -v ./database/config/changelog.xml:/liquibase/changelog.xml \
+            -v ./database/scripts:/liquibase/scripts \
+            liquibase/liquibase \
+            --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
+            --changeLogFile=changelog.xml \
+            update
       - name: Run integration tests
         run: |
           docker run --workdir /app/ \
