@@ -1,0 +1,40 @@
+---
+name: code-maven-QA-integration-postgres
+
+on:
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: Integration Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
+    services:
+      # Label used to access the service container
+      postgres-db:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: actions
+          POSTGRES_DB: actions
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Run integration tests
+        run: |
+          docker run --workdir /app/ \
+            --mount type=bind,src="$(pwd)",dst=/app \
+            maven:3.8.5-jdk-11 \
+            mvn -B clean verify
