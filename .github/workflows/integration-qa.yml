@@ -36,5 +36,6 @@ jobs:
         run: |
           docker run --workdir /app/ \
             --mount type=bind,src="$(pwd)",dst=/app \
+            --network "host" \
             maven:3.8.5-jdk-11 \
             mvn -B clean verify
