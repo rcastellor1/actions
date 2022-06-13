@@ -35,8 +35,8 @@ jobs:
       - name: Initialize database
         run: |
           docker run --rm \
-            -v ./database/config/changelog.xml:/liquibase/changelog.xml \
-            -v ./database/scripts:/liquibase/scripts \
+            -v database/config/changelog.xml:/liquibase/changelog.xml \
+            -v database/scripts:/liquibase/scripts \
             liquibase/liquibase \
             --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
             --changeLogFile=changelog.xml \
