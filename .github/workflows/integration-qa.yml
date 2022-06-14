@@ -32,6 +32,16 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Setup Maven Cache
+        uses: actions/cache@v3
+        continue-on-error: true
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Initialize database
         run: |
           docker run --rm \
@@ -42,6 +52,7 @@ jobs:
             --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
             --changeLogFile=changelog.xml \
             update
+            
       - name: Run integration tests
         run: |
           docker run --workdir /app/ \
