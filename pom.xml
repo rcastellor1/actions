@@ -15,6 +15,7 @@
 	<description>Pruebas con github actions</description>
 	<properties>
 		<java.version>11</java.version>
+		<liquibase.propertyFile>src/main/resources/database/liquibase.properties</liquibase.propertyFile>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -29,6 +30,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+			<version>42.3.6</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -45,6 +47,21 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+              <groupId>org.liquibase</groupId>
+              <artifactId>liquibase-maven-plugin</artifactId>
+              <version>3.8.0</version>
+              <configuration>
+                <propertyFile>${liquibase.propertyFile}</propertyFile>
+              </configuration>
+              <dependencies>
+			  	<dependency>
+					<groupId>org.postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+					<version>42.3.6</version>
+				</dependency>
+              </dependencies>
+            </plugin>
 		</plugins>
 	</build>
 

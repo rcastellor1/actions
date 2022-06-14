@@ -33,6 +33,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '11'
+
       - name: Setup Maven Cache
         uses: actions/cache@v3
         id: dependency-cache
@@ -44,21 +50,12 @@ jobs:
 
       - name: Initialize database
         run: |
-          docker run --rm \
-            --mount type=bind,source="$(pwd)"/database/config/changelog.xml,target=/liquibase/changelog.xml \
-            --mount type=bind,source="$(pwd)"/database/scripts,target=/liquibase/scripts \
-            --network "host" \
-            liquibase/liquibase \
-            --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
-            --changeLogFile=changelog.xml \
-            update
+          mkdir -p "$HOME"/.m2/repository
+          mvn liquibase:update \
+            -Dliquibase.url="jdbc:postgresql://localhost:5432/actions" \
+            -Dliquibase.username=postgres \
+            -Dliquibase.password=actions
 
       - name: Run integration tests
         run: |
-          mkdir -p "$HOME"/.m2/repository
-          docker run --workdir /app/ \
-            --mount type=bind,src="$HOME"/.m2/repository,dst=/root/.m2/repository \
-            --mount type=bind,src="$(pwd)",dst=/app \
-            --network "host" \
-            maven:3.8.5-jdk-11 \
             mvn -B clean verify
