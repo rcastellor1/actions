@@ -52,10 +52,11 @@ jobs:
             --url="jdbc:postgresql://localhost:5432/actions?user=postgres&password=actions" \
             --changeLogFile=changelog.xml \
             update
-            
+
       - name: Run integration tests
         run: |
           docker run --workdir /app/ \
+            --mount type=bind,src="$HOME"/.m2/repository,dst=/home/runner/.m2/repository \
             --mount type=bind,src="$(pwd)",dst=/app \
             --network "host" \
             maven:3.8.5-jdk-11 \
