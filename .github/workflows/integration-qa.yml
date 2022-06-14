@@ -48,10 +48,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Initialize database
+      - name: Compile project
         run: |
           mkdir -p "$HOME"/.m2/repository
-          mvn liquibase:update \
+          mvn -B compile
+
+      - name: Initialize database
+        run: |
+          mvn -B liquibase:update \
             -Dliquibase.url="jdbc:postgresql://localhost:5432/actions" \
             -Dliquibase.username=postgres \
             -Dliquibase.password=actions
