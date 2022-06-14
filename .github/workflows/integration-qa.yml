@@ -53,6 +53,7 @@ jobs:
 
       - name: Run integration tests
         run: |
+          mkdir -p "$HOME"/.m2/repository
           docker run --workdir /app/ \
             --mount type=bind,src="$HOME"/.m2/repository,dst=/home/runner/.m2/repository \
             --mount type=bind,src="$(pwd)",dst=/app \
