@@ -1,0 +1,69 @@
+---
+name: QA-integration-postgres-docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: Integration Tests
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
+    services:
+      # Label used to access the service container
+      postgres-db:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: actions
+          POSTGRES_DB: actions
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Maven Cache
+        uses: actions/cache@v3
+        id: dependency-cache
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-docker-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Compile project
+        run: |
+          mkdir -p "$HOME"/.m2/repository
+          mvn -B compile
+
+      - name: Initialize database
+        run: |
+          docker run --workdir /app/ \
+            --mount type=bind,src="$HOME"/.m2/repository,dst=/root/.m2/repository \
+            --mount type=bind,src="$(pwd)",dst=/app \
+            --network "host" \
+            maven:3.8.5-jdk-11 \
+            mvn -B liquibase:update \
+            -Dliquibase.url="jdbc:postgresql://localhost:5432/actions" \
+            -Dliquibase.username=postgres \
+            -Dliquibase.password=actions
+
+      - name: Run integration tests
+        run: |
+          docker run --workdir /app/ \
+            --mount type=bind,src="$HOME"/.m2/repository,dst=/root/.m2/repository \
+            --mount type=bind,src="$(pwd)",dst=/app \
+            --network "host" \
+            maven:3.8.5-jdk-11 \
+            mvn -B clean verify
