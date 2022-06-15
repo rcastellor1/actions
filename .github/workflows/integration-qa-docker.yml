@@ -49,7 +49,7 @@ jobs:
             --mount type=bind,src="$(pwd)",dst=/app \
             --network "host" \
             maven:3.8.5-jdk-11 \
-            mvn -B liquibase:update \
+            mvn -B compile liquibase:update \
             -Dliquibase.url="jdbc:postgresql://localhost:5432/actions" \
             -Dliquibase.username=postgres \
             -Dliquibase.password=actions
